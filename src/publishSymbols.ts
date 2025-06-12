@@ -108,7 +108,15 @@ export async function unzipSymbolClient(clientZip: string, destinationDirectory:
   core.debug(`Unzipped - ${result}`)
 }
 
-export async
+export async function replaceDbgHelpDLL(destinationDirectory: string): Promise<void> {
+  // Copy all dlls from the bin/ folder to the destinationDirectory.
+  const binPath = path.join(__dirname, 'bin')
+  const dlls = fs.readdirSync(binPath).filter(file => file.endsWith('.dll'))
+  for (const dll of dlls) {
+    fs.copyFileSync(path.join(binPath, dll), path.join(destinationDirectory, dll))
+    core.info(`Copied ${dll} to ${destinationDirectory}`)
+  }
+}
 
 export async function updateSymbolClient(accountName: string, symbolServiceUri: string, personalAccessToken: string): Promise<string> {
   core.debug('Checking for most recent symbol.app.buildtask.zip version')
@@ -142,8 +150,6 @@ export async function updateSymbolClient(accountName: string, symbolServiceUri: 
 
     await unzipSymbolClient(symbolClientZip, unzipPath)
 
-    await replaceDbgHelpDLL(unzipPath)
-
     // Cache the tool for future use
     toolPath = await tc.cacheDir(unzipPath, toolName, versionNumber)
 
@@ -154,6 +160,8 @@ export async function updateSymbolClient(accountName: string, symbolServiceUri: 
 
   // add on the lib\net45 path to the actual executable
   toolPath = isWindows ? path.join(toolPath, 'lib', 'net45') : toolPath
+
+  await replaceDbgHelpDLL(toolPath)
 
   return toolPath
 }
