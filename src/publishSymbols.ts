@@ -108,6 +108,8 @@ export async function unzipSymbolClient(clientZip: string, destinationDirectory:
   core.debug(`Unzipped - ${result}`)
 }
 
+export async
+
 export async function updateSymbolClient(accountName: string, symbolServiceUri: string, personalAccessToken: string): Promise<string> {
   core.debug('Checking for most recent symbol.app.buildtask.zip version')
 
@@ -139,6 +141,8 @@ export async function updateSymbolClient(accountName: string, symbolServiceUri: 
     const unzipPath = path.join(baseDownloadPath, zipName)
 
     await unzipSymbolClient(symbolClientZip, unzipPath)
+
+    await replaceDbgHelpDLL(unzipPath)
 
     // Cache the tool for future use
     toolPath = await tc.cacheDir(unzipPath, toolName, versionNumber)
